@@ -1,111 +1,101 @@
-from os import environ
-from aws_cdk.core import CustomResource
-import aws_cdk.core as core
-import aws_cdk.aws_logs as logs
-import aws_cdk.aws_iam as iam
-import aws_cdk.custom_resources as cr
-import aws_cdk.aws_lambda as lambda_
+import aws_cdk as cdk
+from aws_cdk import aws_logs
+from aws_cdk import aws_lambda
+from aws_cdk import aws_iam
+from aws_cdk import custom_resources
 
 
-class WorkMailOrgStack(core.Stack):
 
-    def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
+class WorkMailOrgStack(cdk.Stack):
+
+    def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        orgname_param = core.CfnParameter(self, "OrganizationName",
-                #type="String",
-                default='my-sample-workmail-org'
-                )
+        orgname_param = cdk.CfnParameter(self, "OrganizationName",
+                                           default='my-sample-workmail-org')
 
-        username_param = core.CfnParameter(self, "UserName",
-                #type="String",
-                default='support'
-                )
-        pass_param = core.CfnParameter(self, "PassWord",
-                #type="String",
-                default='Welcome@123'
-                )
-        create_workmail_org_lambda = lambda_.Function(self, "id_WorkMailOrg",
-                                                      runtime=lambda_.Runtime.PYTHON_3_6,
-                                                      function_name='workmail_org_creation',
-                                                      code=lambda_.Code.asset(
-                                                          "lambda/workmail-org-user-domain-lambda"),
-                                                      handler="workmailcreateorg.handler",
-                                                      environment= {'work_org_name': orgname_param.value_as_string,
-                                                                    'user_name': username_param.value_as_string,
-                                                                    'password': pass_param.value_as_string}
-                                                      )
-                                                     
-        
-                
-        create_workmail_org_lambda.role.attach_inline_policy(
-            iam.Policy(
-                self, "id_workmail_custom_resource_lambda_policy",
-                policy_name = "workmail_custom_resource_lambda_policy",
-                statements = [
-                    iam.PolicyStatement(
-                        actions = [
-                            "workmail:*",
-                            "ds:*",
-                            "ses:*"
-                        ],
-                        resources= [ '*' ],
-                    )
-                ]
-            )
+        username_param = cdk.CfnParameter(self, "UserName",
+                                           default='support')
+
+        pass_param = cdk.CfnParameter(self, "PassWord",
+                                       default='Welcome@123')
+
+        create_workmail_org_lambda = aws_lambda.Function(
+            self, "id_WorkMailOrg",
+            runtime=aws_lambda.Runtime.PYTHON_3_6,
+            function_name='workmail_org_creation',
+            code=aws_lambda.Code.from_asset("lambda/workmail-org-user-domain-lambda"),
+            handler="workmailcreateorg.handler",
+            environment={
+                'work_org_name': orgname_param.value_as_string,
+                'user_name': username_param.value_as_string,
+                'password': pass_param.value_as_string
+            }
         )
 
-
-        is_complete_org = lambda_.Function(
-                                            self, "id_workmail_org_is_complete",
-                                            function_name="resource-is-complete-lambda",
-                                            code=lambda_.Code.asset(
-                                               "lambda/workmail-org-user-domain-lambda"),
-                                            handler="workmailcreateorg.is_complete",
-                                            runtime=lambda_.Runtime.PYTHON_3_6,
-                                            environment= {'work_org_name':orgname_param.value_as_string,
-                                                            'user_name': username_param.value_as_string,
-                                                                'password': pass_param.value_as_string}
-                                                                    )
-                                            
-        '''core.CfnOutput(
-            self, "id_support_email_address",
-            description="Support Email Address",
-            value='Support Email Address  : '+,
-        )'''
-
-
-        is_complete_org.role.attach_inline_policy(
-            iam.Policy(
-                self, "id_is_complete_custom_resource_lambda_policy",
-                policy_name = "is_complete_custom_resource_lambda_policy",
-                statements = [
-                    iam.PolicyStatement(
-                        actions = [
-                            "workmail:*",
-                            "ds:*",
-                            "ses:*"
-                        ],
-                        resources= [ '*' ],
-                    )
-                ]
-            )
+        policy = aws_iam.Policy(
+            self, "id_workmail_custom_resource_lambda_policy",
+            policy_name="workmail_custom_resource_lambda_policy",
+            statements=[
+                aws_iam.PolicyStatement(
+                    actions=[
+                        "workmail:*",
+                        "ds:*",
+                        "ses:*"
+                    ],
+                    resources=['*'],
+                )
+            ]
         )
 
-        create_workmail_org = cr.Provider(self, "id_workmail_org",
-                                          on_event_handler=create_workmail_org_lambda,
-                                          is_complete_handler=is_complete_org,  # optional async "waiter"
-                                          log_retention=logs.RetentionDays.ONE_DAY#,  # default is INFINITE
-                                          #role=my_role
-                                          )
-        
+        policy.attach_to_role(create_workmail_org_lambda.role)
 
-        CustomResource(self, id="id_Work_Mail_Org_Resource",
-                       service_token=create_workmail_org.service_token)
-        
-        core.CfnOutput(
+        is_complete_org = aws_lambda.Function(
+            self, "id_workmail_org_is_complete",
+            function_name="resource-is-complete-lambda",
+            code=aws_lambda.Code.from_asset(
+                "lambda/workmail-org-user-domain-lambda"),
+            handler="workmailcreateorg.is_complete",
+            runtime=aws_lambda.Runtime.PYTHON_3_6,
+            environment={
+                'work_org_name': orgname_param.value_as_string,
+                'user_name': username_param.value_as_string,
+                'password': pass_param.value_as_string
+            }
+        )
+
+        is_complete_policy = aws_iam.Policy(
+            self, "id_is_complete_custom_resource_lambda_policy",
+            policy_name="is_complete_custom_resource_lambda_policy",
+            statements=[
+                aws_iam.PolicyStatement(
+                    actions=[
+                        "workmail:*",
+                        "ds:*",
+                        "ses:*"
+                    ],
+                    resources=['*'],
+                )
+            ]
+        )
+
+        is_complete_policy.attach_to_role(is_complete_org.role)
+
+        create_workmail_org = custom_resources.Provider(
+            self, "id_workmail_org",
+            on_event_handler=create_workmail_org_lambda,
+            is_complete_handler=is_complete_org,
+            log_retention=aws_logs.RetentionDays.ONE_DAY
+        )
+
+        cdk.CustomResource(
+            self, id="id_Work_Mail_Org_Resource",
+            service_token=create_workmail_org.service_token
+        )
+
+        cdk.CfnOutput(
             self, "ResponseMessage",
             description="Your support email address is",
-            value="Your support email address is:  "+ username_param.value_as_string+'@'+orgname_param.value_as_string+'.awsapps.com'                                                                                              
+            value="Your support email address is:  " + username_param.value_as_string +
+            '@'+orgname_param.value_as_string+'.awsapps.com'
         )
-        
