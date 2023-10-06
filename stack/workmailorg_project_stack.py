@@ -8,17 +8,12 @@ from aws_cdk import custom_resources
 
 class WorkMailOrgStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, organization_name=None, user_name=None, password=None,  **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        orgname_param = cdk.CfnParameter(self, "OrganizationName",
-                                           default='my-sample-workmail-org')
-
-        username_param = cdk.CfnParameter(self, "UserName",
-                                           default='support')
-
-        pass_param = cdk.CfnParameter(self, "PassWord",
-                                       default='Welcome@123')
+        orgname_param = cdk.CfnParameter(self, "OrganizationName", default=organization_name or 'my-sample-workmail-org')
+        username_param = cdk.CfnParameter(self, "UserName", default=user_name or 'support')
+        pass_param = cdk.CfnParameter(self, "PassWord", default=password or 'Welcome@123')
 
         create_workmail_org_lambda = aws_lambda.Function(
             self, "id_WorkMailOrg",
