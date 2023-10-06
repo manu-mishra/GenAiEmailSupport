@@ -87,6 +87,7 @@ class WorkMailOrgStack(cdk.Stack):
             self, id="id_Work_Mail_Org_Resource",
             service_token=create_workmail_org.service_token
         )
+        self.support_email_id = 'support@' + orgname_param.value_as_string + '.awsapps.com'  # Assuming this is how you determine your email ID
 
         cdk.CfnOutput(
             self, "SupportEmailOutput",
