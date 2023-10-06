@@ -8,9 +8,11 @@ import os.path as path
 
 class EmailAutomationWorkflowStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, human_workflow_email=None, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, support_email: str, human_workflow_email=None, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
+        # creating parameters
+        support_email_param = support_email
         # Using the provided human_workflow_email or falling back to parameter prompt
         if human_workflow_email:
             human_workflow_email_param = cdk.CfnParameter(self, "humanWorkflowEmail", default=human_workflow_email)
@@ -50,7 +52,7 @@ class EmailAutomationWorkflowStack(cdk.Stack):
         return workmail_lambda
 
     def email_handler_lambda(self, human_workflow_topic):        
-        support_email = cdk.CfnParameter(self, "supportEmail").value_as_string
+      
         
         email_handler_lambda = lambda_.Function(
             self, "id_email_handler_lambda_fn",
@@ -61,7 +63,7 @@ class EmailAutomationWorkflowStack(cdk.Stack):
             timeout = cdk.Duration.minutes(1),
             environment={
                 "HUMAN_WORKFLOW_SNS_TOPIC_ARN" : human_workflow_topic.topic_arn,
-                "SOURCE_EMAIL" : support_email
+                "SOURCE_EMAIL" : support_email_param
             }
         )
 

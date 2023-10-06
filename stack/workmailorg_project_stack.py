@@ -89,8 +89,8 @@ class WorkMailOrgStack(cdk.Stack):
         )
 
         cdk.CfnOutput(
-            self, "ResponseMessage",
-            description="Your support email address is",
-            value="Your support email address is:  " + username_param.value_as_string +
+            self, "SupportEmailOutput",
+            description="Support Email Id",
+            value=username_param.value_as_string +
             '@'+orgname_param.value_as_string+'.awsapps.com'
         )
