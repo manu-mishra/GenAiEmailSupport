@@ -17,7 +17,7 @@ class WorkMailOrgStack(cdk.Stack):
 
         create_workmail_org_lambda = aws_lambda.Function(
             self, "id_WorkMailOrg",
-            runtime=aws_lambda.Runtime.PYTHON_3_10,
+            runtime=aws_lambda.Runtime.PYTHON_3_11,
             function_name='workmail_org_creation',
             code=aws_lambda.Code.from_asset("lambda/workmail-org-user-domain-lambda"),
             handler="workmailcreateorg.handler",
@@ -51,7 +51,7 @@ class WorkMailOrgStack(cdk.Stack):
             code=aws_lambda.Code.from_asset(
                 "lambda/workmail-org-user-domain-lambda"),
             handler="workmailcreateorg.is_complete",
-            runtime=aws_lambda.Runtime.PYTHON_3_10,
+            runtime=aws_lambda.Runtime.PYTHON_3_11,
             environment={
                 'work_org_name': orgname_param.value_as_string,
                 'user_name': username_param.value_as_string,

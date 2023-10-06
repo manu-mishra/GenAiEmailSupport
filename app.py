@@ -18,5 +18,5 @@ human_workflow_email = app.node.try_get_context('HumanWorkflowEmail')
 
 # Deploy Stacks
 workmail_stack = WorkMailOrgStack(app, "WorkMailOrgStack", organization_name=organization_name, user_name=user_name, password=password)
-EmailAutomationWorkflowStack(app, "EmailAutomationWorkflowStack",, support_email=workmail_stack.support_email_id, human_workflow_email=human_workflow_email)
+EmailAutomationWorkflowStack(app, "EmailAutomationWorkflowStack", support_email=workmail_stack.support_email_id, human_workflow_email=human_workflow_email)
 app.synth()
