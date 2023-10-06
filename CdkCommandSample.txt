@@ -1,0 +1,5 @@
+cdk deploy --all \
+-c OrganizationName=awsconcepts \
+-c UserName=manu \
+-c PassWord=Welcome@123 \
+-c HumanWorkflowEmail=abc@example.com
