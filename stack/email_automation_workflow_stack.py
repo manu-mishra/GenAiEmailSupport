@@ -22,8 +22,8 @@ class EmailAutomationWorkflowStack(cdk.Stack):
             self, "id_workmail_integration_lambda_lambda_fn", 
             function_name="workmail-integration-lambda-fn",
             code = lambda_.Code.from_asset(path.join("./lambda", "workmail-integration-lambda")),
-            handler = "lambda_function.lambda_handler",
-            runtime = lambda_.Runtime.PYTHON_3_10,
+            handler = "workmail_integration_function.lambda_handler",
+            runtime = lambda_.Runtime.PYTHON_3_11,
             timeout = cdk.Duration.minutes(1),
             environment={
                 "EMAIL_HANDLER_LAMBDA_FN_NAME": email_handler_lambda.function_name
@@ -50,8 +50,8 @@ class EmailAutomationWorkflowStack(cdk.Stack):
             self, "id_email_handler_lambda_fn",
             function_name="email-handler-lambda-fn",
             code = lambda_.Code.from_asset(path.join("./lambda", "email-handler-lambda")),
-            handler = "lambda_function.lambda_handler",
-            runtime = lambda_.Runtime.PYTHON_3_10,
+            handler = "email_handler_function.lambda_handler",
+            runtime = lambda_.Runtime.PYTHON_3_11,
             timeout = cdk.Duration.minutes(1),
             environment={
                 "HUMAN_WORKFLOW_SNS_TOPIC_ARN": human_workflow_topic.topic_arn,
