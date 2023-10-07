@@ -87,16 +87,12 @@ class KendraStack(cdk.Stack):
                     "urls": {
                         "siteMapsConfiguration": {
                             "siteMaps": [
-                                "https://docs.aws.amazon.com/lex/latest/dg/sitemap.xml",
                                 "https://docs.aws.amazon.com/kendra/latest/dg/sitemap.xml",
-                                "https://docs.aws.amazon.com/sagemaker/latest/dg/sitemap.xml"
                             ]
                         }
                     },
                     "urlInclusionPatterns": [
-                        ".*https://docs.aws.amazon.com/lex/.*",
                         ".*https://docs.aws.amazon.com/kendra/.*",
-                        ".*https://docs.aws.amazon.com/sagemaker/.*"
                     ]
                 }
             }
