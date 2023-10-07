@@ -26,7 +26,7 @@ def lambda_handler(event, context):
             signal_cloudformation(event, 'SUCCESS', context)
         elif event['RequestType'] == 'Delete':
             # Handle cleanup if necessary, then signal SUCCESS
-            signal_cloudformation(event, 'SUCCESS', context)
+            pass
     except Exception as e:
         logger.error(f"Error processing the event: {e}")
         signal_cloudformation(event, 'FAILURE', context)
