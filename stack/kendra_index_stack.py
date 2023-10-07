@@ -129,8 +129,7 @@ class KendraStack(cdk.Stack):
             code=_lambda.Code.from_asset("lambda/kendra-indexing-lambda"), 
             environment={
                 "INDEX_ID": kendra_index.ref,
-                "DS_ID": kendra_docs_ds.ref,
-                "AWS_REGION": cdk.Aws.REGION
+                "DS_ID": kendra_docs_ds.ref
             }
         )
 
