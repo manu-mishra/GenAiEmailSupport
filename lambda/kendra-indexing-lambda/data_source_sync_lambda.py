@@ -22,12 +22,12 @@ def lambda_handler(event, context):
     
     if event['RequestType'] == 'Create' or event['RequestType'] == 'Update':
         start_data_source_sync(DS_ID, INDEX_ID)
-        signal_cloudformation(event, 'SUCCESS')
+        signal_cloudformation(event, 'SUCCESS', context)
     elif event['RequestType'] == 'Delete':
         # Handle cleanup if necessary, then signal SUCCESS
-        signal_cloudformation(event, 'SUCCESS')
+        signal_cloudformation(event, 'SUCCESS', context)
 
-def signal_cloudformation(event, status):
+def signal_cloudformation(event, status, context):
     response_data = {}
     physicalResourceId = event.get('PhysicalResourceId', context.log_stream_name)
 
