@@ -18,14 +18,18 @@ def start_data_source_sync(dsId, indexId):
     logger.info(f"response:" + json.dumps(resp))
 
 def lambda_handler(event, context):
-    logger.info("Received event: %s" % json.dumps(event))
+    try:
+        logger.info("Received event: %s" % json.dumps(event))
     
-    if event['RequestType'] == 'Create' or event['RequestType'] == 'Update':
-        start_data_source_sync(DS_ID, INDEX_ID)
-        signal_cloudformation(event, 'SUCCESS', context)
-    elif event['RequestType'] == 'Delete':
-        # Handle cleanup if necessary, then signal SUCCESS
-        signal_cloudformation(event, 'SUCCESS', context)
+        if event['RequestType'] == 'Create' or event['RequestType'] == 'Update':
+            start_data_source_sync(DS_ID, INDEX_ID)
+            signal_cloudformation(event, 'SUCCESS', context)
+        elif event['RequestType'] == 'Delete':
+            # Handle cleanup if necessary, then signal SUCCESS
+            signal_cloudformation(event, 'SUCCESS', context)
+    except Exception as e:
+        logger.error(f"Error processing the event: {e}")
+        signal_cloudformation(event, 'FAILED', context)
 
 def signal_cloudformation(event, status, context):
     response_data = {}
