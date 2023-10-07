@@ -46,17 +46,8 @@ class KendraStack(cdk.Stack):
         kendra_index = kendra.CfnIndex(
             self, "docs_kendra_index",
             name=f"{cdk.Aws.STACK_NAME}Index",
-            edition=cdk.Fn.sub("${kendra_edition}"),
+            edition="DEVELOPER_EDITION",
             role_arn=kendra_index_role.role_arn
-        )
-
-        # Parameters for the CDK stack
-        kendra_edition_parameter = cdk.CfnParameter(
-            self, "kendra_edition",
-            type="String",
-            default="DEVELOPER_EDITION",
-            allowed_values=["ENTERPRISE_EDITION", "DEVELOPER_EDITION"],
-            description="ENTERPRISE_EDITION is recommended for production deployments. DEVELOPER_EDITION (Free Tier eligible) is suitable for non-production (default)."
         )
 
         # Outputs for the CDK stack
