@@ -5,8 +5,8 @@ from aws_cdk import aws_lambda as _lambda
 
 class KendraStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, id: str, **kwargs) -> None:
-        super().__init__(scope, id, **kwargs)
+    def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
+        super().__init__(scope, construct_id, **kwargs)
 
         # Role for Kendra Index
         kendra_index_role = iam.Role(
@@ -64,7 +64,7 @@ class KendraStack(cdk.Stack):
             self, "kendra_index_id",
             value=kendra_index.ref
         )
-        self.kendra_index_Id = kendra_index.ref
+        self.kendra_index_id = kendra_index.ref
 
         # Role for Kendra Data Source (Web Crawler)
         kendra_ds_role = iam.Role(

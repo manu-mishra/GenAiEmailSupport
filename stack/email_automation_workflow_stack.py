@@ -8,14 +8,15 @@ import os.path as path
 
 class EmailAutomationWorkflowStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, support_email: str, human_workflow_email: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, support_email: str, human_workflow_email: str, kendra_index:str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         human_topic = self.human_workflow_topic(human_workflow_email)
         
-        email_handler_lambda = self.email_handler_lambda(human_topic, support_email)
+        email_handler_lambda = self.email_handler_lambda(human_topic, support_email,kendra_index)
         
         workmail_lambda = self.workmail_integration_lambda(email_handler_lambda)
+
 
     def workmail_integration_lambda(self, email_handler_lambda):        
         workmail_lambda = lambda_.Function(
@@ -44,7 +45,7 @@ class EmailAutomationWorkflowStack(cdk.Stack):
         email_handler_lambda.grant_invoke(workmail_lambda)        
         return workmail_lambda
         
-    def email_handler_lambda(self, human_workflow_topic, support_email):        
+    def email_handler_lambda(self, human_workflow_topic, support_email, kendra_index):        
         
         email_handler_lambda = lambda_.Function(
             self, "id_email_handler_lambda_fn",
@@ -55,7 +56,8 @@ class EmailAutomationWorkflowStack(cdk.Stack):
             timeout = cdk.Duration.minutes(1),
             environment={
                 "HUMAN_WORKFLOW_SNS_TOPIC_ARN": human_workflow_topic.topic_arn,
-                "SOURCE_EMAIL": support_email
+                "SOURCE_EMAIL": support_email,
+                "KENDRA_INDEX": kendra_index
             }
         )
 
