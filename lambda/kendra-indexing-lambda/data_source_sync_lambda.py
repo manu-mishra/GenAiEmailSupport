@@ -19,12 +19,17 @@ def start_data_source_sync(dsId, indexId):
 
 def lambda_handler(event, context):
     logger.info("Received event: %s" % json.dumps(event))
-    start_data_source_sync(DS_ID, INDEX_ID)
-    signal_cloudformation(event, 'SUCCESS')
+    
+    if event['RequestType'] == 'Create' or event['RequestType'] == 'Update':
+        start_data_source_sync(DS_ID, INDEX_ID)
+        signal_cloudformation(event, 'SUCCESS')
+    elif event['RequestType'] == 'Delete':
+        # Handle cleanup if necessary, then signal SUCCESS
+        signal_cloudformation(event, 'SUCCESS')
 
 def signal_cloudformation(event, status):
     response_data = {}
-    physicalResourceId = context.log_stream_name if 'PhysicalResourceId' not in event else event['PhysicalResourceId']
+    physicalResourceId = event.get('PhysicalResourceId', context.log_stream_name)
 
     try:
         CLOUDFORMATION.signal_resource(
