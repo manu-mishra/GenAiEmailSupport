@@ -7,7 +7,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 INDEX_ID = os.environ['INDEX_ID']
-DS_ID = os.environ['DS_ID']
+DS_ID = os.environ['DS_ID'].split('|')[0]  # extracting the correct ID part
 AWS_REGION = os.environ['AWS_REGION']
 KENDRA = boto3.client('kendra')
 CLOUDFORMATION = boto3.client('cloudformation')
@@ -29,7 +29,7 @@ def lambda_handler(event, context):
             signal_cloudformation(event, 'SUCCESS', context)
     except Exception as e:
         logger.error(f"Error processing the event: {e}")
-        signal_cloudformation(event, 'FAILED', context)
+        signal_cloudformation(event, 'FAILURE', context)
 
 def signal_cloudformation(event, status, context):
     response_data = {}

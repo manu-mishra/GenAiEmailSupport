@@ -112,6 +112,11 @@ class KendraStack(cdk.Stack):
                             effect=iam.Effect.ALLOW,
                             resources=[f"arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index.ref}*"],
                             actions=["kendra:*"]
+                        ),
+                        iam.PolicyStatement( 
+                        effect=iam.Effect.ALLOW,
+                        resources=[f"arn:aws:cloudformation:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:stack/{cdk.Aws.STACK_NAME}/*"],
+                        actions=["cloudformation:SignalResource"]
                         )
                     ]
                 )
