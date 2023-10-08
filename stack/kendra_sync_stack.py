@@ -55,6 +55,12 @@ class KendraDataSyncStack(cdk.Stack):
             }
         )
 
+        data_source_sync_lambda.add_permission(
+            "AllowCloudFormationInvoke",
+            action="lambda:InvokeFunction",
+            principal=iam.ServicePrincipal("cloudformation.amazonaws.com")
+        )
+
         # Create a daily EventBridge (CloudWatch Events) rule
         daily_rule = aws_events.Rule(
             self, "DailySyncRule",
