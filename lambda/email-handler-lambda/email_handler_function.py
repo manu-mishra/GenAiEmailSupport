@@ -4,7 +4,7 @@ import boto3
 import logging
 import os
 import datetime
-from chain_logic import generate_response  # Import the generate_response function
+from chain_logic import generate_response 
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
