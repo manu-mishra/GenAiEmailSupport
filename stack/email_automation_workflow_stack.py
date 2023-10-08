@@ -50,10 +50,19 @@ class EmailAutomationWorkflowStack(cdk.Stack):
         email_handler_lambda = lambda_.Function(
             self, "id_email_handler_lambda_fn",
             function_name="email-handler-lambda-fn",
-            code = lambda_.Code.from_asset(path.join("./lambda", "email-handler-lambda")),
+            code = lambda_.Code.from_asset(
+                path.join("./lambda", "email-handler-lambda"),
+                bundling={
+                    "image": lambda_.Runtime.PYTHON_3_11.bundling_image,
+                    "command": [
+                        'bash', '-c', 
+                        'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output'
+                    ],
+                }
+            ),
             handler = "email_handler_function.lambda_handler",
             runtime = lambda_.Runtime.PYTHON_3_11,
-            timeout = cdk.Duration.minutes(1),
+            timeout = cdk.Duration.minutes(5),
             environment={
                 "HUMAN_WORKFLOW_SNS_TOPIC_ARN": human_workflow_topic.topic_arn,
                 "SOURCE_EMAIL": support_email,
