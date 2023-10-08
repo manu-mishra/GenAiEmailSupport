@@ -141,7 +141,7 @@ class KendraStack(cdk.Stack):
 
         is_complete_lambda = _lambda.Function(
             self, "is_complete_lambda",
-            handler="is_complete_lambda.is_complete",
+            handler="data_source_sync_lambda.is_complete",
             runtime=_lambda.Runtime.PYTHON_3_11,
             role=lambda_role,
             timeout=cdk.Duration.minutes(15),
