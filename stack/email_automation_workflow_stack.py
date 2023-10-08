@@ -54,6 +54,7 @@ class EmailAutomationWorkflowStack(cdk.Stack):
             handler = "email_handler_function.lambda_handler",
             runtime = lambda_.Runtime.PYTHON_3_11,
             timeout = cdk.Duration.minutes(1),
+            log_retention=cdk.RetentionDays.ONE_DAY
             environment={
                 "HUMAN_WORKFLOW_SNS_TOPIC_ARN": human_workflow_topic.topic_arn,
                 "SOURCE_EMAIL": support_email,
@@ -65,6 +66,38 @@ class EmailAutomationWorkflowStack(cdk.Stack):
             iam.PolicyStatement(
                 actions=["ses:SendEmail"],
                 resources=['*']
+            )
+        )
+        # Grant permissions for all 'Kendra' actions 
+        kendra_index_arn = f"arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index}"
+        email_handler_lambda.add_to_role_policy(
+        iam.PolicyStatement(
+            actions=[
+                "kendra:GetQuerySuggestions",
+                "kendra:Query",
+                "kendra:DescribeIndex",
+                "kendra:Retrieve",
+                "kendra:DescribeFaq",
+                "kendra:DescribeExperience",
+                "kendra:DescribeQuerySuggestionsBlockList",
+                "kendra:DescribeQuerySuggestionsConfig",
+                "kendra:BatchGetDocumentStatus",
+                "kendra:DescribePrincipalMapping",
+                "kendra:DescribeAccessControlConfiguration",
+                "kendra:GetSnapshots",
+                "kendra:DescribeFeaturedResultsSet",
+                "kendra:DescribeDataSource",
+                "kendra:DescribeThesaurus",
+                "kendra:ListTagsForResource"
+            ],
+            resources=[kendra_index_arn]
+            )
+        )
+        # Grant permissions for all 'bedrock' actions
+        email_handler_lambda.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["bedrock:*"],
+                resources=["*"]
             )
         )
         
