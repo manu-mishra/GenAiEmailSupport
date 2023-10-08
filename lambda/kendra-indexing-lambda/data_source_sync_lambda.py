@@ -10,36 +10,41 @@ INDEX_ID = os.environ['INDEX_ID']
 DS_ID = os.environ['DS_ID'].split('|')[0]  # extracting the correct ID part
 AWS_REGION = os.environ['AWS_REGION']
 KENDRA = boto3.client('kendra')
-CLOUDFORMATION = boto3.client('cloudformation')
+
+def lambda_handler(event, context):
+    logger.info("Received event: %s" % json.dumps(event))
+    
+    request_type = event['RequestType']
+    if request_type == 'Create': 
+        return on_create(event)
+    elif request_type == 'Update': 
+        return on_update(event)
+    elif request_type == 'Delete': 
+        return on_delete(event)
+    else:
+        raise Exception("Invalid request type: %s" % request_type)
+
+def on_create(event):
+    try:
+        start_data_source_sync(DS_ID, INDEX_ID)
+        response = {'PhysicalResourceId': 'KendraSyncResource'}
+        return response
+    except Exception as e:
+        logger.error(f"Error processing the event: {e}")
+        raise e
+
+def on_update(event):
+    # For now, treat update same as create
+    return on_create(event)
+
+def on_delete(event):
+    # No specific delete logic as of now
+    response = {
+        'PhysicalResourceId': event.get('PhysicalResourceId', 'DefaultKendraSyncResourceId')
+    }
+    return response
 
 def start_data_source_sync(dsId, indexId):
     logger.info(f"start_data_source_sync(dsId={dsId}, indexId={indexId})")
     resp = KENDRA.start_data_source_sync_job(Id=dsId, IndexId=indexId)
     logger.info(f"response:" + json.dumps(resp))
-
-def lambda_handler(event, context):
-    try:
-        logger.info("Received event: %s" % json.dumps(event))
-    
-        if event['RequestType'] == 'Create' or event['RequestType'] == 'Update':
-            start_data_source_sync(DS_ID, INDEX_ID)
-        elif event['RequestType'] == 'Delete':
-            # Handle cleanup if necessary, then signal SUCCESS
-            pass
-    except Exception as e:
-        logger.error(f"Error processing the event: {e}")
-        signal_cloudformation(event, 'FAILURE', context)
-
-def signal_cloudformation(event, status, context):
-    response_data = {}
-    physicalResourceId = event.get('PhysicalResourceId', context.log_stream_name)
-
-    try:
-        CLOUDFORMATION.signal_resource(
-            StackName=event['StackId'],
-            LogicalResourceId=event['LogicalResourceId'],
-            UniqueId=physicalResourceId,
-            Status=status
-        )
-    except Exception as e:
-        logger.error(f"Failed signaling CloudFormation: {e}")
