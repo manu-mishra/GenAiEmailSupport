@@ -51,13 +51,6 @@ class KendraStack(cdk.Stack):
             role_arn=kendra_index_role.role_arn
         )
 
-        # Outputs for the CDK stack
-        kendra_index_output = cdk.CfnOutput(
-            self, "kendra_index_id",
-            value=kendra_index.ref
-        )
-        self.kendra_index_id = kendra_index.ref
-
         # Role for Kendra Data Source (Web Crawler)
         kendra_ds_role = iam.Role(
             self, "kendra_ds_role",
@@ -98,72 +91,13 @@ class KendraStack(cdk.Stack):
                 }
             }
         )
-
-        # Role for DataSourceSync Lambda
-        lambda_role = iam.Role(
-            self, "data_source_sync_lambda_role",
-            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
-            managed_policies=[
-                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
-            ],
-            inline_policies={
-                "data_source_sync_lambda_policy": iam.PolicyDocument(
-                    statements=[
-                        iam.PolicyStatement(
-                            effect=iam.Effect.ALLOW,
-                            resources=[f"arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index.ref}*"],
-                            actions=["kendra:*"]
-                        ),
-                        iam.PolicyStatement( 
-                        effect=iam.Effect.ALLOW,
-                        resources=[f"arn:aws:cloudformation:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:stack/{cdk.Aws.STACK_NAME}/*"],
-                        actions=["cloudformation:SignalResource"]
-                        )
-                    ]
-                )
-            }
+        # Outputs for the CDK stack
+        self.kendra_index_output = cdk.CfnOutput(
+            self, "kendra_index_id",
+            value=self.kendra_index.ref
         )
-
-        # Lambda function for DataSourceSync
-        data_source_sync_lambda = _lambda.Function(
-            self, "data_source_sync_lambda",
-            handler="data_source_sync_lambda.lambda_handler",
-            runtime=_lambda.Runtime.PYTHON_3_11,
-            role=lambda_role,
-            timeout=cdk.Duration.minutes(15),
-            memory_size=1024,
-            code=_lambda.Code.from_asset("lambda/kendra-indexing-lambda"), 
-            environment={
-                "INDEX_ID": kendra_index.ref,
-                "DS_ID": kendra_docs_ds.ref
-            }
+        
+        self.kendra_ds_output = cdk.CfnOutput(
+            self, "kendra_ds_id",
+            value=kendra_docs_ds.ref
         )
-
-        is_complete_lambda = _lambda.Function(
-            self, "is_complete_lambda",
-            handler="data_source_sync_lambda.is_complete",
-            runtime=_lambda.Runtime.PYTHON_3_11,
-            role=lambda_role,
-            timeout=cdk.Duration.minutes(15),
-            memory_size=1024,
-            code=_lambda.Code.from_asset("lambda/kendra-indexing-lambda"), 
-            environment={
-                "INDEX_ID": kendra_index.ref,
-                "DS_ID": kendra_docs_ds.ref
-            }
-        )
-
-        custom_provider = custom_resources.Provider(
-            self, "CustomResourceProvider",
-            on_event_handler=data_source_sync_lambda,
-            is_complete_handler=is_complete_lambda
-        )
-
-        # Custom resource for DataSourceSync
-        data_source_sync = cdk.CustomResource(
-            self, "DataSourceSync",
-            service_token=custom_provider.service_token
-        )
-        data_source_sync.node.add_dependency(kendra_index)
-        data_source_sync.node.add_dependency(kendra_docs_ds)
-
