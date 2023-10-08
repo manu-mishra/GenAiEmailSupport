@@ -10,7 +10,7 @@ from aws_cdk import aws_events_targets
 
 class KendraDataSyncStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, kendra_stack, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, kendra_index: str, kendra_ds:str **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Role for DataSourceSync Lambda
@@ -49,8 +49,8 @@ class KendraDataSyncStack(cdk.Stack):
             memory_size=1024,
             code=_lambda.Code.from_asset("lambda/kendra-indexing-lambda"),  # Ensure this path points to your Lambda function code
             environment={
-                "INDEX_ID": kendra_stack.kendra_index_output.value,
-                "DS_ID": kendra_stack.kendra_ds_output.value
+                "INDEX_ID": kendra_index,
+                "DS_ID": kendra_ds
             }
         )
 
