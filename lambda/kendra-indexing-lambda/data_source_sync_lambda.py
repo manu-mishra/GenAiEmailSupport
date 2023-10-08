@@ -23,7 +23,6 @@ def lambda_handler(event, context):
     
         if event['RequestType'] == 'Create' or event['RequestType'] == 'Update':
             start_data_source_sync(DS_ID, INDEX_ID)
-            signal_cloudformation(event, 'SUCCESS', context)
         elif event['RequestType'] == 'Delete':
             # Handle cleanup if necessary, then signal SUCCESS
             pass
