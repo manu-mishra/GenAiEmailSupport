@@ -54,7 +54,7 @@ class EmailAutomationWorkflowStack(cdk.Stack):
             handler = "email_handler_function.lambda_handler",
             runtime = lambda_.Runtime.PYTHON_3_11,
             timeout = cdk.Duration.minutes(1),
-            log_retention=cdk.RetentionDays.ONE_DAY
+            log_retention=cdk.RetentionDays.ONE_DAY,
             environment={
                 "HUMAN_WORKFLOW_SNS_TOPIC_ARN": human_workflow_topic.topic_arn,
                 "SOURCE_EMAIL": support_email,
