@@ -2,7 +2,7 @@ import aws_cdk as cdk
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_lambda as _lambda
-from aws_cdk import custom_resources
+
 
 class KendraStack(cdk.Stack):
 
@@ -92,6 +92,8 @@ class KendraStack(cdk.Stack):
             }
         )
         # Outputs for the CDK stack
+        self.kendra_index_id = kendra_index.ref
+        self.kendra_ds_id = kendra_docs_ds.ref
         self.kendra_index_output = cdk.CfnOutput(
             self, "kendra_index_id",
             value=kendra_index.ref

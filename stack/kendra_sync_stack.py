@@ -6,11 +6,12 @@ from aws_cdk import aws_events
 from aws_cdk import aws_logs
 from aws_cdk import aws_logs
 from aws_cdk import aws_events_targets
+from aws_cdk import custom_resources
 
 
 class KendraDataSyncStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, kendra_index: str, kendra_ds:str **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, kendra_index: str, kendra_ds:str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Role for DataSourceSync Lambda
@@ -25,7 +26,7 @@ class KendraDataSyncStack(cdk.Stack):
                     statements=[
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
-                            resources=[f"arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_stack.kendra_index_output.value}*"],
+                            resources=[f"arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index}*"],
                             actions=["kendra:*"]
                         ),
                         iam.PolicyStatement(
