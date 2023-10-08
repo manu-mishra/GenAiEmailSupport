@@ -4,7 +4,7 @@ from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.llms.bedrock import Bedrock
-
+import os
 # Initialize the Bedrock model
 llm = Bedrock(
     model_kwargs={
