@@ -131,7 +131,7 @@ class KendraStack(cdk.Stack):
             role=lambda_role,
             timeout=cdk.Duration.minutes(15),
             memory_size=1024,
-            log_retention=cdk.RetentionDays.ONE_DAY
+            log_retention=cdk.RetentionDays.ONE_DAY,
             code=_lambda.Code.from_asset("lambda/kendra-indexing-lambda"), 
             environment={
                 "INDEX_ID": kendra_index.ref,
