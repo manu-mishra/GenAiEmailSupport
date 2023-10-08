@@ -1,7 +1,10 @@
+# lambda_handler.py
+
 import boto3
 import logging
 import os
-import json
+import datetime
+from chain_logic import generate_response  # Import the generate_response function
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -48,7 +51,28 @@ def validate_params(event):
       
     return email, meta
 
-def send_response_email(to_email, subject, body):
+
+def send_response_email(to_email, subject, response_body, original_email_body, original_sender):
+    out_of_context_tag = "##outofcontext##"
+    if out_of_context_tag in response_body:
+        response_body = response_body.replace(out_of_context_tag, "")
+        notification_message = f"User's email: {original_email_body}\n\nResponse sent: {response_body}"
+        human_workflow_topic.publish(Message=notification_message)
+
+    # Get the current date and time
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Format the original email content to look like a typical email client reply
+    original_message_format = (
+        f"\n\nFrom: {original_sender}\n"
+        f"Sent: {current_date}\n"
+        f"To: {to_email}\n"
+        f"Subject: {subject}\n\n"
+        f"{original_email_body}"
+    )
+    
+    final_body = response_body + original_message_format
+        
     response = ses_client.send_email(
         Source=source_email,
         Destination={
@@ -61,20 +85,23 @@ def send_response_email(to_email, subject, body):
             },
             'Body': {
                 'Text': {
-                    'Data': body,
+                    'Data': final_body,
                     'Charset': 'UTF-8'
                 }
             }
         }
     )
-    
     logger.info(f"Sent email. Response: {response}")
+
+
 
 def lambda_handler(event, context):
     email, meta = validate_params(event)   
-   
     logger.info(f"Received email with content {email['body']}")
-   
-    send_response_email(email['to'], "Re: " + email['subject'], "Thanks, email received.")
+
+    # Use the chain to generate a response
+    response_text = generate_response(email['body'])
+
+    send_response_email(email['to'], "Re: " + email['subject'], response_text, email['body'])
       
     return {"message": "Response email sent."}
