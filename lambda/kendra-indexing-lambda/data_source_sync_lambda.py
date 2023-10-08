@@ -24,6 +24,11 @@ def lambda_handler(event, context):
     else:
         raise Exception("Invalid request type: %s" % request_type)
 
+def is_complete(event):
+    # Always return success as we do not need to wait for sync job to complete.
+    return {
+        'IsComplete': True
+    }
 def on_create(event):
     try:
         start_data_source_sync(DS_ID, INDEX_ID)

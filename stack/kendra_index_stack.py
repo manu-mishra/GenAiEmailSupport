@@ -2,6 +2,7 @@ import aws_cdk as cdk
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_lambda as _lambda
+from aws_cdk import custom_resources
 
 class KendraStack(cdk.Stack):
 
@@ -138,10 +139,30 @@ class KendraStack(cdk.Stack):
             }
         )
 
+        is_complete_lambda = _lambda.Function(
+            self, "is_complete_lambda",
+            handler="is_complete_lambda.is_complete",
+            runtime=_lambda.Runtime.PYTHON_3_11,
+            role=lambda_role,
+            timeout=cdk.Duration.minutes(15),
+            memory_size=1024,
+            code=_lambda.Code.from_asset("lambda/kendra-indexing-lambda"), 
+            environment={
+                "INDEX_ID": kendra_index.ref,
+                "DS_ID": kendra_docs_ds.ref
+            }
+        )
+
+        custom_provider = custom_resources.Provider(
+            self, "CustomResourceProvider",
+            on_event_handler=data_source_sync_lambda,
+            is_complete_handler=is_complete_lambda
+        )
+
         # Custom resource for DataSourceSync
         data_source_sync = cdk.CustomResource(
             self, "DataSourceSync",
-            service_token=data_source_sync_lambda.function_arn
+            service_token=custom_provider.service_token
         )
         data_source_sync.node.add_dependency(kendra_index)
         data_source_sync.node.add_dependency(kendra_docs_ds)
