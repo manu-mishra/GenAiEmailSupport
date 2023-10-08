@@ -94,7 +94,7 @@ class KendraStack(cdk.Stack):
         # Outputs for the CDK stack
         self.kendra_index_output = cdk.CfnOutput(
             self, "kendra_index_id",
-            value=self.kendra_index.ref
+            value=kendra_index.ref
         )
         
         self.kendra_ds_output = cdk.CfnOutput(
