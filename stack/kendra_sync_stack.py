@@ -28,11 +28,6 @@ class KendraDataSyncStack(cdk.Stack):
                             effect=iam.Effect.ALLOW,
                             resources=[f"arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index}*"],
                             actions=["kendra:*"]
-                        ),
-                        iam.PolicyStatement(
-                            effect=iam.Effect.ALLOW,
-                            resources=[f"arn:aws:cloudformation:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:stack/{cdk.Aws.STACK_NAME}/*"],
-                            actions=["cloudformation:SignalResource"]
                         )
                     ]
                 )
@@ -70,17 +65,3 @@ class KendraDataSyncStack(cdk.Stack):
         # Set the Lambda function as the target for the daily rule
         daily_rule.add_target(aws_events_targets.LambdaFunction(data_source_sync_lambda))
 
-        # invoke once
-        custom_resources.AwsCustomResource(
-            self, "InvokeLambdaOnce",
-            on_create={
-                "service": "Lambda",
-                "action": "invoke",
-                "parameters": {
-                    "FunctionName": data_source_sync_lambda.function_name,
-                    "InvocationType": "Event"
-                },
-                "physical_resource_id": custom_resources.PhysicalResourceId.of("InvokeLambdaOnceOnCreate")
-            },
-            policy=custom_resources.AwsCustomResourcePolicy.from_sdk_calls(resources=custom_resources.AwsCustomResourcePolicy.ANY_RESOURCE)
-        )
