@@ -58,6 +58,7 @@ def send_response_email(to_email, subject, response_body, original_email_body, o
         response_body = response_body.replace(out_of_context_tag, "")
         notification_message = f"User's email: {original_email_body}\n\nResponse sent: {response_body}"
         human_workflow_topic.publish(Message=notification_message)
+        logger.info(notification_message)
 
     # Get the current date and time
     current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

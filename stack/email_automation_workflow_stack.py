@@ -81,22 +81,7 @@ class EmailAutomationWorkflowStack(cdk.Stack):
         email_handler_lambda.add_to_role_policy(
         iam.PolicyStatement(
             actions=[
-                "kendra:GetQuerySuggestions",
-                "kendra:Query",
-                "kendra:DescribeIndex",
-                "kendra:Retrieve",
-                "kendra:DescribeFaq",
-                "kendra:DescribeExperience",
-                "kendra:DescribeQuerySuggestionsBlockList",
-                "kendra:DescribeQuerySuggestionsConfig",
-                "kendra:BatchGetDocumentStatus",
-                "kendra:DescribePrincipalMapping",
-                "kendra:DescribeAccessControlConfiguration",
-                "kendra:GetSnapshots",
-                "kendra:DescribeFeaturedResultsSet",
-                "kendra:DescribeDataSource",
-                "kendra:DescribeThesaurus",
-                "kendra:ListTagsForResource"
+                "kendra:*",
             ],
             resources=[kendra_index_arn]
             )
