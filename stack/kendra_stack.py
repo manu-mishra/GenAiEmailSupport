@@ -3,9 +3,9 @@ from nested_stacks.kendra.kendra_index_stack import KendraIndexStack
 from nested_stacks.kendra.kendra_ds_webcrawller_stack import KendraWebCrawlerStack
 
 
-class KendraStack(cdk):
+class KendraStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         kendra_index_stack = KendraIndexStack(scope,"KendraIndexStack")

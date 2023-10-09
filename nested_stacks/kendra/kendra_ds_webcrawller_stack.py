@@ -4,9 +4,9 @@ from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_lambda as _lambda
 
 
-class KendraWebCrawlerStack(cdk.Stack):
+class KendraWebCrawlerStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.App, construct_id: str,kendra_index_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str,kendra_index_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Role for Kendra Data Source (Web Crawler)

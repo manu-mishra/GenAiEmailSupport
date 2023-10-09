@@ -3,9 +3,9 @@ from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 
 
-class KendraIndexStack(cdk.Stack):
+class KendraIndexStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Role for Kendra Index

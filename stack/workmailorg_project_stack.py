@@ -6,9 +6,9 @@ from aws_cdk import custom_resources
 
 
 
-class WorkMailOrgStack(cdk.Stack):
+class WorkMailOrgStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, organization_name=None, user_name=None, password=None,  **kwargs) -> None:
+    def __init__(self, scope: cdk.Construct, construct_id: str, organization_name=None, user_name=None, password=None,  **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         orgname_param = cdk.CfnParameter(self, "OrganizationName", default=organization_name or 'my-sample-workmail-org')
