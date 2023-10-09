@@ -2,8 +2,7 @@ import os
 import aws_cdk as cdk
 from stack.email_automation_workflow_stack import EmailAutomationWorkflowStack
 from stack.workmailorg_project_stack import WorkMailOrgStack
-from stack.kendra_index_stack import KendraStack
-from stack.kendra_sync_stack import KendraDataSyncStack
+from stack.kendra_stack import KendraStack
 
         
 
