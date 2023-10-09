@@ -66,7 +66,7 @@ def send_response_email(to_email, subject, response_body, original_email_body, o
     original_message_format = (
         f"\n\nFrom: {original_sender}\n"
         f"Sent: {current_date}\n"
-        f"To: {to_email}\n"
+        f"To: {source_email}\n"
         f"Subject: {subject}\n\n"
         f"{original_email_body}"
     )
@@ -102,6 +102,6 @@ def lambda_handler(event, context):
     # Use the chain to generate a response
     response_text = generate_response(email['body'])
 
-    send_response_email(email['to'], "Re: " + email['subject'], response_text, email['body'])
+    send_response_email(email['to'], "Re: " + email['subject'], response_text, email['body'],email['to'])
       
     return {"message": "Response email sent."}

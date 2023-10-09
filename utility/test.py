@@ -1,57 +1,107 @@
-from langchain.retrievers import AmazonKendraRetriever
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
-from langchain.llms.bedrock import Bedrock
-from langchain.chains.llm import LLMChain
+# lambda_handler.py
 
-llm = Bedrock(
-      model_kwargs={"max_tokens_to_sample":300,"temperature":1,"top_k":250,"top_p":0.999,"anthropic_version":"bedrock-2023-05-31"},
-      model_id="anthropic.claude-v2"
-  )
-  
-prompt_template = """
-Human: You are an Email Support Agent named "Gen-AI Agent". Use only the information within the <knowledgebase> tags to answer. Do not rely on any external or inherent knowledge. Be formal and empathetic. If the information isn't in <knowledgebase>, indicate that the support team is informed and will reply if necessary, then append "##outofcontext##". Never hint or mention "knowledgebase", "data", or any other indicators of the information source.
+import boto3
+import logging
+import os
+import datetime
+from chain_logic import generate_response 
 
-Assistant: Understood. I am "Gen-AI Agent". I'll use only the data within <knowledgebase> to answer. If the answer isn't found, I'll notify about the support team and add "##outofcontext##".
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-Human: Data in <knowledgebase>:
-<knowledgebase>
-{context}
-</knowledgebase>
+sns_client = boto3.resource('sns')
+ses_client = boto3.client('ses')
 
-User's email in <useremail>:
-<useremail>
-{question}
-</useremail>
+human_workflow_topic_arn = os.getenv("HUMAN_WORKFLOW_SNS_TOPIC_ARN")
+source_email = os.getenv("SOURCE_EMAIL")
 
-Assistant:
-"""
-
-
-  
-PROMPT = PromptTemplate(
-      template=prompt_template, input_variables=["context", "question"]
-)
-
-retriever = AmazonKendraRetriever(index_id="f50aa19c-b4f1-4da2-943b-78ab1e1e4eee")
-
-chain_type_kwargs = {"prompt": PROMPT}
+if not human_workflow_topic_arn:
+    raise ValueError("env variable HUMAN_WORKFLOW_SNS_TOPIC is required.")  
     
-chain= RetrievalQA.from_chain_type(
-      llm, 
-      chain_type="stuff", 
-      retriever=retriever, 
-      chain_type_kwargs=chain_type_kwargs, 
-      return_source_documents=True
-  )
-result = chain("can you explain what is kendra? regards, Bob")
-print(result['result'])
+if not source_email:
+    raise ValueError("env variable SOURCE_EMAIL is required.")     
 
-result = chain("how do i cure my dogs cancer? regards, Aly")
-print(result['result'])
+human_workflow_topic = sns_client.Topic(human_workflow_topic_arn)
 
-result = chain("What is Amazon AWS? regards, Bob")
-print(result['result'])
+def validate_params(event):  
+    email = event['email']
+    meta = event['meta']
+   
+    if not email:
+        raise ValueError("No email found.")
+    if not meta:
+        raise ValueError("No metadata found.")
+   
+    email_body = email['body']
+    email_subject = email['subject']
+    user_email = email['to']
+    message_source = meta['source']
+    message_id = meta['id']
+   
+    if not email_body:
+        raise ValueError("No email body found.")
+    if not email_subject:
+        raise ValueError("No email subject found.")
+    if not user_email:
+        raise ValueError("No user email found.")
+    if not message_source:
+        raise ValueError("No email source found.")
+    if not message_id:
+        raise ValueError("No email source id found.")
+      
+    return email, meta
 
-result = chain("What is microsoft Azure? regards, Aly")
-print(result['result'])
+
+def send_response_email(to_email, subject, response_body, original_email_body, original_sender):
+    out_of_context_tag = "##outofcontext##"
+    if out_of_context_tag in response_body:
+        response_body = response_body.replace(out_of_context_tag, "")
+        notification_message = f"User's email: {original_email_body}\n\nResponse sent: {response_body}"
+        human_workflow_topic.publish(Message=notification_message)
+
+    # Get the current date and time
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Format the original email content to look like a typical email client reply
+    original_message_format = (
+        f"\n\nFrom: {original_sender}\n"
+        f"Sent: {current_date}\n"
+        f"To: {source_email}\n"
+        f"Subject: {subject}\n\n"
+        f"{original_email_body}"
+    )
+    
+    final_body = response_body + original_message_format
+        
+    response = ses_client.send_email(
+        Source=source_email,
+        Destination={
+            'ToAddresses': [to_email]
+        },
+        Message={
+            'Subject': {
+                'Data': subject,
+                'Charset': 'UTF-8'
+            },
+            'Body': {
+                'Text': {
+                    'Data': final_body,
+                    'Charset': 'UTF-8'
+                }
+            }
+        }
+    )
+    logger.info(f"Sent email. Response: {response}")
+
+
+
+def lambda_handler(event, context):
+    email, meta = validate_params(event)   
+    logger.info(f"Received email with content {email['body']}")
+
+    # Use the chain to generate a response
+    response_text = generate_response(email['body'])
+
+    send_response_email(email['to'], "Re: " + email['subject'], response_text, email['body'],email['to'])
+      
+    return {"message": "Response email sent."}
