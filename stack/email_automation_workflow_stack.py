@@ -8,7 +8,7 @@ import os.path as path
 
 class EmailAutomationWorkflowStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, support_email: str, human_workflow_email: str, kendra_index:str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, support_email: str, human_workflow_email: str, kendra_index:str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         human_topic = self.human_workflow_topic(human_workflow_email)

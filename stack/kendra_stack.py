@@ -5,10 +5,10 @@ from nested_stacks.kendra.kendra_ds_webcrawller_stack import KendraWebCrawlerSta
 
 class KendraStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        kendra_index_stack = KendraIndexStack(scope,"KendraIndexStack")
+        kendra_index_stack = KendraIndexStack(scope,"KendraIndex")
         self.kendra_index_id = kendra_index_stack.kendra_index_id
         
         kendra_web_crawler_stack = KendraWebCrawlerStack(scope,"KendraWebCrawler",self.kendra_index_id)

@@ -6,16 +6,16 @@ from aws_cdk import aws_lambda as _lambda
 
 class KendraWebCrawlerStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str,kendra_index_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str,kendra_index_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Role for Kendra Data Source (Web Crawler)
         kendra_ds_role = iam.Role(
             self, "kendra_ds_role",
             assumed_by=iam.ServicePrincipal("kendra.amazonaws.com"),
-            role_name=f"{cdk.Aws.STACK_NAME}-docs_ds_role",
+            role_name="docs_ds_role",
             inline_policies={
-                f"{cdk.Aws.STACK_NAME}_docs_ds_policy": iam.PolicyDocument(
+                "docs_ds_policy": iam.PolicyDocument(
                     statements=[
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,

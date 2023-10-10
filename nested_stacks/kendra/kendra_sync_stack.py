@@ -11,7 +11,7 @@ from aws_cdk import custom_resources
 
 class KendraDataSyncStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, kendra_index: str, kendra_ds:str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, kendra_index: str, kendra_ds:str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Role for DataSourceSync Lambda

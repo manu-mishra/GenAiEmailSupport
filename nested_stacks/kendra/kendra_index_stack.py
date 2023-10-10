@@ -5,16 +5,16 @@ from aws_cdk import aws_kendra as kendra
 
 class KendraIndexStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Role for Kendra Index
         kendra_index_role = iam.Role(
-            self, "kendra_index_role",
+            self, "app_kendra_index_role",
             assumed_by=iam.ServicePrincipal("kendra.amazonaws.com"),
-            role_name=f"{cdk.Aws.STACK_NAME}_docs_kendra_index_role",
+            role_name="docs_kendra_index_role",
             inline_policies={
-                f"{cdk.Aws.STACK_NAME}_docs_kendra_index_policy": iam.PolicyDocument(
+                "docs_kendra_index_policy": iam.PolicyDocument(
                     statements=[
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
@@ -45,7 +45,7 @@ class KendraIndexStack(cdk.NestedStack):
         # Kendra Index
         kendra_index = kendra.CfnIndex(
             self, "docs_kendra_index",
-            name=f"{cdk.Aws.STACK_NAME}Index",
+            name=f"{self.stack_name}Index",
             edition="DEVELOPER_EDITION",
             role_arn=kendra_index_role.role_arn
         )
