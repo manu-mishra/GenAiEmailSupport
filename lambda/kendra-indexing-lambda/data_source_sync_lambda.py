@@ -1,5 +1,6 @@
 import boto3
 import logging
+import json
 
 # Set up logging
 logger = logging.getLogger()
@@ -7,7 +8,7 @@ logger.setLevel(logging.INFO)
 
 def handler(event, context):
     kendra_client = boto3.client('kendra')
-
+    logger.info("Received event: %s", json.dumps(event))
     try:
         # Extract the Kendra Index ID and Data Source ID from the event
         index_id = event['index_id']
