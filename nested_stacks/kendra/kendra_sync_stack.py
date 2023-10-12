@@ -23,7 +23,10 @@ class KendraDataSyncStack(cdk.NestedStack):
         # Grant permissions to the Lambda function to start Kendra sync job
         self.start_sync_lambda.add_to_role_policy(iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
-            resources=[f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}'],
+            resources=[
+                f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}',
+                f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}/data-source/*'
+            ],
             actions=['kendra:StartDataSourceSyncJob']
         ))
 
