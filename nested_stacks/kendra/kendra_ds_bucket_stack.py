@@ -3,6 +3,8 @@ from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3_deploy
+from aws_cdk import aws_lambda as _lambda
+import os.path as path
 
 class KendraS3DataSourceStack(cdk.NestedStack):
 
@@ -80,7 +82,7 @@ class KendraS3DataSourceStack(cdk.NestedStack):
             source_account=cdk.Aws.ACCOUNT_ID
         )
         # Grant permissions to the Lambda function to start Kendra sync job
-        self.lambda_function.add_to_role_policy(iam.PolicyStatement(
+        lambda_function.add_to_role_policy(iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
             resources=[
                 f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}/data-source/*'
