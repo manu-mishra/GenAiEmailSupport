@@ -3,12 +3,10 @@ from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3_deploy
-from aws_cdk import aws_events as events
-from aws_cdk import aws_events_targets as targets
 
 class KendraS3DataSourceStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, kendra_index_id: str, event_bus_arn: str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, kendra_index_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Create S3 bucket with a unique name
@@ -61,33 +59,9 @@ class KendraS3DataSourceStack(cdk.NestedStack):
                 }
             }
         )
-        # Use the provided event bus ARN to define an EventBridge rule
-        event_bus = events.EventBus.from_event_bus_arn(self, "ExistingEventBus", event_bus_arn)
-
-        # Define an EventBridge rule to send an event to the event bus when the Kendra data source is created
-        data_source_created_rule = events.Rule(
-            self, "DataSourceCreatedRule",
-            event_bus=event_bus,
-            event_pattern=events.EventPattern(
-                source=['aws.kendra'],
-                detail_type=['Kendra DataSource Status'],
-                detail={
-                    'State': ['CREATED'],
-                    'Id': [kendra_s3_ds.ref]  # Use the data source ID from the Kendra data source
-                }
-            )
-        )
-        # Specify custom input for the Lambda function
-        custom_input = events.RuleTargetInput.from_object({
-            'index_id': kendra_index_id,
-            'data_source_id': kendra_s3_ds.ref
-        })
-        # Add a target for the rule (your Lambda function) with the custom input
-        data_source_created_rule.add_target(targets.EventBusPutEvents(event_bus, input=custom_input))
 
         # Outputs for the CDK stack
         self.kendra_ds_id = kendra_s3_ds.ref
-        
         self.kendra_ds_output = cdk.CfnOutput(
             self, "kendra_ds_id",
             value=kendra_s3_ds.ref

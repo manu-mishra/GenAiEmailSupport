@@ -14,10 +14,9 @@ class KendraStack(cdk.NestedStack):
         self.kendra_index_id = kendra_index_stack.kendra_index_id
 
         kendra_data_sync_stack = KendraDataSyncStack(scope,"KendraDataSyncStack", self.kendra_index_id)
-        self.kendra_data_sync_eventbus_arn = kendra_data_sync_stack.event_bus_arn_output.value
 
-        kendra_web_crawler_stack = KendraWebCrawlerStack(scope,"KendraWebCrawler",self.kendra_index_id, self.kendra_data_sync_eventbus_arn)
-        kendra_s3_data_source_stack = KendraS3DataSourceStack(scope,"KendraS3DataSource",self.kendra_index_id, self.kendra_data_sync_eventbus_arn)
+        kendra_web_crawler_stack = KendraWebCrawlerStack(scope,"KendraWebCrawler",self.kendra_index_id)
+        kendra_s3_data_source_stack = KendraS3DataSourceStack(scope,"KendraS3DataSource",self.kendra_index_id)
         
         self.kendra_ds_id = kendra_web_crawler_stack.kendra_ds_id
         self.kendra_ds_web_id = kendra_web_crawler_stack.kendra_ds_id

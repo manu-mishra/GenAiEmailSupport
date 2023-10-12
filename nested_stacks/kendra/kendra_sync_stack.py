@@ -52,8 +52,4 @@ class KendraDataSyncStack(cdk.NestedStack):
             value=self.start_sync_lambda.function_arn
         )
 
-        # Expose the EventBus's ARN for use in other stacks
-        self.event_bus_arn_output = cdk.CfnOutput(
-            self, "EventBusArn",
-            value=event_bus.event_bus_arn
-        )
+       
