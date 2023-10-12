@@ -8,7 +8,7 @@ import os.path as path
 
 class EmailAutomationWorkflowStack(cdk.NestedStack):
 
-    def __init__(self, scope: cdk.App, construct_id: str, support_email: str, human_workflow_email: str, kendra_index:str, **kwargs) -> None:
+    def __init__(self, scope: cdk.App, construct_id: str, support_email: str, human_workflow_email: str, kendra_index:str,kendra_web_datasource_ref:str,kendra_bucket_datasource_ref:str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         human_topic = self.human_workflow_topic(human_workflow_email)
@@ -66,7 +66,9 @@ class EmailAutomationWorkflowStack(cdk.NestedStack):
             environment={
                 "HUMAN_WORKFLOW_SNS_TOPIC_ARN": human_workflow_topic.topic_arn,
                 "SOURCE_EMAIL": support_email,
-                "KENDRA_INDEX": kendra_index
+                "KENDRA_INDEX": kendra_index,
+                "FAQ_DATASOURCE_REF": kendra_web_datasource_ref,
+                "SUPPORT_DATASOURCE_REF": kendra_bucket_datasource_ref
             }
         )
 

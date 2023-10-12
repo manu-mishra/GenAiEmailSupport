@@ -17,4 +17,4 @@ class MainStack(cdk.Stack):
 
         kendra_stack = KendraStack(self, "Kendra")
         workmail_stack = WorkMailOrgStack(self, "WorkMailOrg", organization_name=props.organization_name, user_name=props.user_name, password=props.password)
-        EmailAutomationWorkflowStack(self, "EmailAutomationWorkflow", support_email=workmail_stack.support_email_id, human_workflow_email=props.human_workflow_email, kendra_index=kendra_stack.kendra_index_id)
+        EmailAutomationWorkflowStack(self, "EmailAutomationWorkflow", support_email=workmail_stack.support_email_id, human_workflow_email=props.human_workflow_email, kendra_index=kendra_stack.kendra_index_id,kendra_web_datasource_ref=kendra_stack.kendra_ds_web_ref ,kendra_bucket_datasource_ref=kendra_stack.kendra_ds_s3_ref)
