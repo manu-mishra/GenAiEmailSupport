@@ -60,6 +60,33 @@ class KendraS3DataSourceStack(cdk.NestedStack):
             }
         )
 
+        lambda_function = _lambda.Function(
+            self, 'S3TriggeredLambda',
+            runtime=_lambda.Runtime.PYTHON_3_11,  # or any other runtime you prefer
+            handler='s3_source_sync_lambda.handler',
+            code=_lambda.Code.from_asset(path.join("./lambda", "kendra-indexing-lambda")),
+            environment={
+                "KENDRA_INDEX": kendra_index_id,
+                "KENDRA_DATA_SOURCE_ID": kendra_s3_ds.ref
+            }
+        )
+
+        # Grant the Lambda function permissions to be invoked by S3
+        lambda_function.add_permission(
+            "AllowS3Invocation",
+            principal=iam.ServicePrincipal("s3.amazonaws.com"),
+            action="lambda:InvokeFunction",
+            source_arn=data_bucket.bucket_arn,
+            source_account=cdk.Aws.ACCOUNT_ID
+        )
+        # Grant permissions to the Lambda function to start Kendra sync job
+        self.lambda_function.add_to_role_policy(iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            resources=[
+                f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}/data-source/*'
+            ],
+            actions=['kendra:StartDataSourceSyncJob']
+        ))
         # Outputs for the CDK stack
         self.kendra_ds_id = kendra_s3_ds.ref
         self.kendra_ds_output = cdk.CfnOutput(

@@ -1,5 +1,3 @@
-# lambda_handler.py
-
 import boto3
 import logging
 import os
