@@ -2,6 +2,8 @@ import aws_cdk as cdk
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_lambda as _lambda
+from aws_cdk import aws_events as events
+from aws_cdk import aws_events_targets as targets
 
 
 class KendraWebCrawlerStack(cdk.NestedStack):
@@ -72,7 +74,7 @@ class KendraWebCrawlerStack(cdk.NestedStack):
             'data_source_id': kendra_docs_ds.ref
         })
         # Add a target for the rule (your Lambda function) with the custom input
-        data_source_created_rule.add_target(targets.LambdaFunction(self.start_sync_lambda, event=custom_input))
+        data_source_created_rule.add_target(targets.EventBusPutEvents(event_bus, input=custom_input))
 
 
         # Outputs for the CDK stack

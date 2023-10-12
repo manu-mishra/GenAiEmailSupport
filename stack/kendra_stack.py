@@ -13,7 +13,7 @@ class KendraStack(cdk.NestedStack):
         kendra_index_stack = KendraIndexStack(scope,"KendraIndex")
         self.kendra_index_id = kendra_index_stack.kendra_index_id
 
-        kendra_data_sync_stack = KendraDataSyncStack(scope, self.kendra_index_id)
+        kendra_data_sync_stack = KendraDataSyncStack(scope,"KendraDataSyncStack", self.kendra_index_id)
         self.kendra_data_sync_eventbus_arn = kendra_data_sync_stack.event_bus_arn_output.value
 
         kendra_web_crawler_stack = KendraWebCrawlerStack(scope,"KendraWebCrawler",self.kendra_index_id, self.kendra_data_sync_eventbus_arn)

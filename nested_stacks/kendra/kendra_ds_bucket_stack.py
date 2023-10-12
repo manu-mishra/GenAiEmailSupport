@@ -3,6 +3,8 @@ from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3_deploy
+from aws_cdk import aws_events as events
+from aws_cdk import aws_events_targets as targets
 
 class KendraS3DataSourceStack(cdk.NestedStack):
 
@@ -81,7 +83,7 @@ class KendraS3DataSourceStack(cdk.NestedStack):
             'data_source_id': kendra_s3_ds.ref
         })
         # Add a target for the rule (your Lambda function) with the custom input
-        data_source_created_rule.add_target(targets.LambdaFunction(self.start_sync_lambda, event=custom_input))
+        data_source_created_rule.add_target(targets.EventBusPutEvents(event_bus, input=custom_input))
 
         # Outputs for the CDK stack
         self.kendra_ds_id = kendra_s3_ds.ref
