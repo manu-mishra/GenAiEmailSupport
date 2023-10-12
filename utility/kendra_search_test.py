@@ -1,57 +1,61 @@
-from langchain.retrievers import AmazonKendraRetriever
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
-from langchain.llms.bedrock import Bedrock
-from langchain.chains.llm import LLMChain
+import boto3
+import json
 
-llm = Bedrock(
-      model_kwargs={"max_tokens_to_sample":300,"temperature":1,"top_k":250,"top_p":0.999,"anthropic_version":"bedrock-2023-05-31"},
-      model_id="anthropic.claude-v2"
-  )
-  
-prompt_template = """
-Human: You are an Email Support Agent named "Gen-AI Agent". Use only the information within the <knowledgebase> tags to answer. Do not rely on any external or inherent knowledge. Be formal and empathetic. If the information isn't in <knowledgebase>, indicate that the support team is informed and will reply if necessary, then append "##outofcontext##". Never hint or mention "knowledgebase", "data", or any other indicators of the information source.
-
-Assistant: Understood. I am "Gen-AI Agent". I'll use only the data within <knowledgebase> to answer. If the answer isn't found, I'll notify about the support team and add "##outofcontext##".
-
-Human: Data in <knowledgebase>:
-<knowledgebase>
-{context}
-</knowledgebase>
-
-User's email in <useremail>:
-<useremail>
-{question}
-</useremail>
-
-Assistant:
-"""
-
-
-  
-PROMPT = PromptTemplate(
-      template=prompt_template, input_variables=["context", "question"]
-)
-
-retriever = AmazonKendraRetriever(index_id="3a0cd6b7-6031-47a0-816c-c4f932628dff")
-
-chain_type_kwargs = {"prompt": PROMPT}
+def search_kendra_index(index_id, query_text, dataset_id=None):
+    # Create a Kendra client
+    kendra = boto3.client('kendra')
     
-chain= RetrievalQA.from_chain_type(
-      llm, 
-      chain_type="stuff", 
-      retriever=retriever, 
-      chain_type_kwargs=chain_type_kwargs, 
-      return_source_documents=True
-  )
-result = chain("can you explain what is kendra? regards, Bob")
-print(result['result'])
+    # Define the query parameters
+    query_params = {
+        'IndexId': index_id,
+        'QueryText': query_text
+    }
 
-result = chain("how do i cure my dogs cancer? regards, Aly")
-print(result['result'])
+    # If DataSetId is provided, add it as a filter
+    if dataset_id:
+        attribute_filter = {
+            'AndAllFilters': [
+                {
+                    'EqualsTo': {
+                        'Key': 'DataSetId',
+                        'Value': {
+                            'StringValue': dataset_id
+                        }
+                    }
+                }
+            ]
+        }
+        query_params['AttributeFilter'] = attribute_filter
+    
+    # Query the index
+    response = kendra.query(**query_params)
 
-result = chain("What is Amazon AWS? regards, Bob")
-print(result['result'])
+    # Print the entire document (result item) as JSON with all properties
+    for item in response.get('ResultItems', []):
+        print(json.dumps(item, indent=4))
+        print('-----')
 
-result = chain("What is microsoft Azure? regards, Aly")
-print(result['result'])
+def list_all_datasets(index_id):
+    # Create a Kendra client
+    kendra = boto3.client('kendra')
+
+    # List all data sources for the given index
+    response = kendra.list_data_sources(IndexId=index_id)
+    
+    # Print dataset names and their IDs
+    for item in response.get('SummaryItems', []):
+        print(f"Name: {item['Name']}, ID: {item['Id']}")
+
+if __name__ == "__main__":
+    INDEX_ID = "YOUR_KENDRA_INDEX_ID"  # Replace with your Kendra Index ID
+    QUERY_TEXT = "YOUR_SEARCH_QUERY"   # Replace with your search query
+    
+    # Uncomment the following line and replace YOUR_DATASET_ID if you want to filter by DataSetId
+    # DATASET_ID = "YOUR_DATASET_ID"
+    # search_kendra_index(INDEX_ID, QUERY_TEXT, DATASET_ID)
+    
+    # Uncomment the following line to search without a DataSetId filter
+    # search_kendra_index(INDEX_ID, QUERY_TEXT)
+
+    # Uncomment the following line to list all datasets with their IDs
+    # list_all_datasets(INDEX_ID)
