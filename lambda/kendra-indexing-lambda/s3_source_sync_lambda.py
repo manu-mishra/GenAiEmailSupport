@@ -11,16 +11,12 @@ logger.setLevel(logging.INFO)
 def handler(event, context):
     kendra_client = boto3.client('kendra')
     logger.info("Received event: %s", json.dumps(event))
-    kendra_index_id=os.getenv("KENDRA_INDEX")
-    kendra_data_source_id=os.getenv("KENDRA_DATA_SOURCE_ID")
+    kendra_data_source_ref=os.getenv("KENDRA_DATA_SOURCE_REF")
+    data_source_id, kendra_index_id = kendra_data_source_id_full.split('|')
     try:
-        # Extract the Kendra Index ID and Data Source ID from the event
-        index_id = event['index_id']
-        data_source_id = event['data_source_id']
-
         # Start a synchronization job for the given Kendra Index and Data Source
         response = kendra_client.start_data_source_sync_job(
-            Id=kendra_data_source_id,
+            Id=data_source_id,
             IndexId=kendra_index_id
         )
 

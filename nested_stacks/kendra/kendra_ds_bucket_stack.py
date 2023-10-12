@@ -68,8 +68,7 @@ class KendraS3DataSourceStack(cdk.NestedStack):
             handler='s3_source_sync_lambda.handler',
             code=_lambda.Code.from_asset(path.join("./lambda", "kendra-indexing-lambda")),
             environment={
-                "KENDRA_INDEX": kendra_index_id,
-                "KENDRA_DATA_SOURCE_ID": kendra_s3_ds.ref
+                "KENDRA_DATA_SOURCE_REF": kendra_s3_ds.ref
             }
         )
 
