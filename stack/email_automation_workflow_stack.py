@@ -13,9 +13,10 @@ class EmailAutomationWorkflowStack(cdk.NestedStack):
 
         human_topic = self.human_workflow_topic(human_workflow_email)
         
-        email_handler_lambda = self.email_handler_lambda(human_topic, support_email,kendra_index)
+        email_handler_lambda = self.email_handler_lambda(human_topic, support_email,kendra_index,kendra_web_datasource_ref,kendra_bucket_datasource_ref)
         
         workmail_lambda = self.workmail_integration_lambda(email_handler_lambda)
+       
 
 
     def workmail_integration_lambda(self, email_handler_lambda):        
@@ -45,7 +46,7 @@ class EmailAutomationWorkflowStack(cdk.NestedStack):
         email_handler_lambda.grant_invoke(workmail_lambda)        
         return workmail_lambda
         
-    def email_handler_lambda(self, human_workflow_topic, support_email, kendra_index):        
+    def email_handler_lambda(self, human_workflow_topic, support_email, kendra_index,kendra_web_datasource_ref,kendra_bucket_datasource_ref):        
         
         email_handler_lambda = lambda_.Function(
             self, "id_email_handler_lambda_fn",
