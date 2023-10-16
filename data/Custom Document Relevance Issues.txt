@@ -1,0 +1,10 @@
+Custom Document Relevance Issues:
+   - Problem Definitions:
+     1. Dissatisfaction with Kendra's relevance ranking for custom documents.
+     2. Concerns about the effectiveness of custom document relevance.
+     3. Issues with the accuracy of custom document ranking.
+   - Information to Request:
+     - Examples of documents with relevance issues.
+     - Desired relevance ranking or custom ranking rules.
+     - Custom synonyms or query boosting in use.
+

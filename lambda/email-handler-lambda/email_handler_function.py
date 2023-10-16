@@ -54,7 +54,7 @@ def send_response_email(to_email, subject, response_body, original_email_body, o
     out_of_context_tag = "##outofcontext##"
     if out_of_context_tag in response_body:
         response_body = response_body.replace(out_of_context_tag, "")
-        notification_message = f"User's email: {original_email_body}\n\nResponse sent: {response_body}"
+        notification_message = f"Human intervention required for following User's email: {original_email_body}\n\nResponse sent: {response_body}"
         human_workflow_topic.publish(Message=notification_message)
         logger.info(notification_message)
 

@@ -1,0 +1,11 @@
+Search Query Issues:
+   - Problem Definitions:
+     1. Difficulty in obtaining relevant search results.
+     2. Challenges in receiving accurate search outcomes.
+     3. Inability to retrieve desired search results.
+   - Information to Request:
+     - The search query used.
+     - Expected search results.
+     - Actual search results received.
+     - Any query parameters or filters applied.
+     - Encountered error messages.

@@ -1,0 +1,9 @@
+Billing and Subscription Issues:
+   - Problem Definitions:
+     1. Billing-related problems or subscription issues.
+     2. Challenges with billing and subscription management.
+     3. Issues related to AWS Kendra's billing and subscription model.
+   - Information to Request:
+     - AWS Account Id.
+     - Subscription plan and pricing details.
+     - Billing errors or discrepancies.

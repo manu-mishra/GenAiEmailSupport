@@ -1,0 +1,13 @@
+Deployment or Installation Problems:
+   - Problem Definitions:
+     1. Difficulties with Kendra deployment or installation.
+     2. Challenges during the setup and deployment of Kendra.
+     3. Problems related to the installation process.
+     4. Error during deployment
+   - Information to Request:
+     - Deployment method (e.g., AWS Console, CLI).
+     - Deployment settings and parameters.
+     - Error messages during deployment.
+     - Logs and deployment history.
+     - AWS region
+     - AWS account id

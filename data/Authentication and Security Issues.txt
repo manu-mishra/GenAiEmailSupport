@@ -1,0 +1,12 @@
+
+Authentication and Security Issues:
+   - Problem Definitions:
+     1. Problems with authentication or security settings.
+     2. Challenges in ensuring proper authentication and security configurations.
+     3. Authentication and security-related obstacles.
+   - Information to Request:
+     - Description of authentication/authorization setup.
+     - Error messages related to authentication.
+     - Security policies and permissions in use.
+     - Relevant logs or access control lists.
+

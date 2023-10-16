@@ -1,0 +1,9 @@
+Connector Configuration Problems:
+   - Problem Definitions:
+     1. Issues with connectors to external data sources.
+     2. Challenges encountered while configuring data connectors.
+     3. Problems setting up and managing data source connectors.
+   - Information to Request:
+     - Connector type and configuration details.
+     - Error messages during connector setup.
+     - Sample data or URLs causing issues.

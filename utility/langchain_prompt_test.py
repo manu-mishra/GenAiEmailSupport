@@ -1,57 +1,23 @@
-from langchain.retrievers import AmazonKendraRetriever
+#test setup
+import os
+os.environ['KENDRA_INDEX'] = '3a0cd6b7-6031-47a0-816c-c4f932628dff'
+os.environ['FAQ_DATASOURCE_REF'] = '818f5bdf-ee2c-4102-9e10-2cabe3b6b16e|3a0cd6b7-6031-47a0-816c-c4f932628dff'
+os.environ['SUPPORT_DATASOURCE_REF'] = 'c02537d3-c3d2-483f-9bc1-e9b014d6b8e6|3a0cd6b7-6031-47a0-816c-c4f932628dff'
+
+#test setup end
+
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.llms.bedrock import Bedrock
 from langchain.chains.llm import LLMChain
+from chain_logic import generate_response 
 
-llm = Bedrock(
-      model_kwargs={"max_tokens_to_sample":300,"temperature":1,"top_k":250,"top_p":0.999,"anthropic_version":"bedrock-2023-05-31"},
-      model_id="anthropic.claude-v2"
-  )
-  
-prompt_template = """
-Human: You are an Email Support Agent named "Gen-AI Agent". Use only the information within the <knowledgebase> tags to answer. Do not rely on any external or inherent knowledge. Be formal and empathetic. If the information isn't in <knowledgebase>, indicate that the support team is informed and will reply if necessary, then append "##outofcontext##". Never hint or mention "knowledgebase", "data", or any other indicators of the information source.
+kendra_search = KendraSearch()
+#question = "What is Amazon Kendra?"
+#question = "I am facing performance problems with Amazon Kendra? regards bob"
+#question = "I am facing performance problem with my dogs running, can you help? regards bob"
+question = "Is Open search better than Amazon Kendra? regards bob"
+#question = "I am facing performance problem with my dogs running, can you help? regards bob"
+#question = "I am facing performance problem with my dogs running, can you help? regards bob"
 
-Assistant: Understood. I am "Gen-AI Agent". I'll use only the data within <knowledgebase> to answer. If the answer isn't found, I'll notify about the support team and add "##outofcontext##".
-
-Human: Data in <knowledgebase>:
-<knowledgebase>
-{context}
-</knowledgebase>
-
-User's email in <useremail>:
-<useremail>
-{question}
-</useremail>
-
-Assistant:
-"""
-
-
-  
-PROMPT = PromptTemplate(
-      template=prompt_template, input_variables=["context", "question"]
-)
-
-retriever = AmazonKendraRetriever(index_id="3a0cd6b7-6031-47a0-816c-c4f932628dff")
-
-chain_type_kwargs = {"prompt": PROMPT}
-    
-chain= RetrievalQA.from_chain_type(
-      llm, 
-      chain_type="stuff", 
-      retriever=retriever, 
-      chain_type_kwargs=chain_type_kwargs, 
-      return_source_documents=True
-  )
-result = chain("can you explain what is kendra? regards, Bob")
-print(result['result'])
-
-result = chain("how do i cure my dogs cancer? regards, Aly")
-print(result['result'])
-
-result = chain("What is Amazon AWS? regards, Bob")
-print(result['result'])
-
-result = chain("What is microsoft Azure? regards, Aly")
-print(result['result'])
+print(generate_response(question))

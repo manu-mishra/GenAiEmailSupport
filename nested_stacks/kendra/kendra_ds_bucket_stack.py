@@ -3,7 +3,9 @@ from aws_cdk import aws_iam as iam
 from aws_cdk import aws_kendra as kendra
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3_deploy
+from aws_cdk import aws_s3_notifications as s3_notifications
 from aws_cdk import aws_lambda as _lambda
+import os
 import os.path as path
 
 class KendraS3DataSourceStack(cdk.NestedStack):
@@ -15,12 +17,6 @@ class KendraS3DataSourceStack(cdk.NestedStack):
         data_bucket = s3.Bucket(self, "DataBucket",
                                 removal_policy=cdk.RemovalPolicy.DESTROY,
                                 auto_delete_objects=True)
-
-        # Upload a file to the S3 bucket
-        s3_deploy.BucketDeployment(self, "DeployData",
-                                   destination_bucket=data_bucket,
-                                   sources=[s3_deploy.Source.asset('./data')],
-                                   destination_key_prefix="referencedata")  # Optional prefix in S3
 
         # Role for Kendra Data Source (S3)
         kendra_ds_role = iam.Role(
@@ -81,13 +77,39 @@ class KendraS3DataSourceStack(cdk.NestedStack):
             source_account=cdk.Aws.ACCOUNT_ID
         )
         # Grant permissions to the Lambda function to start Kendra sync job
+        ds_id = kendra_s3_ds.ref.split('|')[0]
         lambda_function.add_to_role_policy(iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
             resources=[
-                f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}/data-source/*'
+                f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}',
+                f'arn:aws:kendra:{cdk.Aws.REGION}:{cdk.Aws.ACCOUNT_ID}:index/{kendra_index_id}/data-source/{ds_id}'
             ],
             actions=['kendra:StartDataSourceSyncJob']
         ))
+        lambda_function.node.add_dependency(kendra_s3_ds)
+
+        # Add s3 trigger trigger        
+        data_bucket.add_event_notification(
+            s3.EventType.OBJECT_CREATED_PUT,
+            s3_notifications.LambdaDestination(lambda_function)
+        )
+
+        data_bucket.add_event_notification(
+            s3.EventType.OBJECT_CREATED_POST,
+            s3_notifications.LambdaDestination(lambda_function)
+        )
+        data_bucket.add_event_notification(
+            s3.EventType.OBJECT_REMOVED_DELETE,
+            s3_notifications.LambdaDestination(lambda_function)
+        )
+
+        # Upload a file to the S3 bucket
+        bucket_deployment = s3_deploy.BucketDeployment(self, "DeployData",
+                                   destination_bucket=data_bucket,
+                                   sources=[s3_deploy.Source.asset('./data')],
+                                   destination_key_prefix="referencedata")  # Optional prefix in S3
+        bucket_deployment.node.add_dependency(lambda_function)
+
         # Outputs for the CDK stack
         self.kendra_ds_id = kendra_s3_ds.ref
         self.kendra_ds_output = cdk.CfnOutput(

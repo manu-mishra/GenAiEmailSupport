@@ -1,0 +1,10 @@
+Performance Issues:
+   - Problem Definitions:
+     1. Slow performance of Amazon Kendra.
+     2. Suboptimal system speed and responsiveness.
+     3. Delays and sluggishness in Kendra operations.
+   - Information to Request:
+     - Current hardware specifications and resource utilization.
+     - Query and indexing volume.
+     - Recent changes to the system or workload.
+     - Performance benchmarks or metrics.
